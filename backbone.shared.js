@@ -31,7 +31,8 @@
         {
           p: this.updatePath().concat([attr]),
           od: old_value,
-          oi: value
+          oi: value,
+          type: 'setAttribute'
         }
       ]);
     };
@@ -39,18 +40,26 @@
     SharedModel.prototype.applySharedAction = function(actions) {
       var _this = this;
       return _.each(actions, function(action) {
-        var object;
-        return object = _.reduce(action.p, function(current, next) {
-          var node;
-          if (_.isNumber(next)) {
-            return current.models[next];
-          } else if (node = current[next]) {
-            return node;
-          } else {
-            return current.set(next, action.oi);
-          }
-        }, _this);
+        return _this[action.type](action);
       });
+    };
+
+    SharedModel.prototype.setAttribute = function(action) {
+      var object,
+        _this = this;
+      return object = _.reduce(action.p, function(current, next) {
+        var node;
+        if (_.isNumber(next)) {
+          console.log("NUMBER");
+          return current.models[next];
+        } else if (node = current[next]) {
+          console.log("NODE");
+          return node;
+        } else {
+          console.log("UPDATE VALUE");
+          return current.set(next, action.oi);
+        }
+      }, this);
     };
 
     return SharedModel;

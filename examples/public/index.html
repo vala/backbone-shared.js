@@ -7,9 +7,13 @@
   <body>
 
     <form>
-
+      <h1>Project</h1>
+      <div id="project">
+      </div>
+      <h2>Tracks</h2>
+      <div id="tracks">
+      </div>
     </form>
-
 
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script src="/channel/bcsocket.js"></script>
@@ -35,14 +39,18 @@
         sharejs.open('testdoc', 'json', 'http://localhost:8000/channel', function(error, doc) {
           if(error) console.log(error);
           if (doc.created) {
-            doc.submitOp([{ p: [], oi: project }])
+            doc.submitOp([{ p: [], oi: project }]);
           }
-          window.doc = doc
-          window.project = new Project(doc.snapshot)
+
+          window.doc = doc;
+          window.project = new Project(doc.snapshot);
+          window.project_view = new ProjectView({ model: window.project });
+
+          window.project_view.render();
 
           doc.on('change', function(a, b, c) {
-            window.project.applySharedAction(a)
-          })
+            window.project.applySharedAction(a);
+          });
         })
 
       });

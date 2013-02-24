@@ -16,22 +16,29 @@ class Backbone.SharedModel extends Backbone.Model
     window.doc.submitOp([
       p: @updatePath().concat([attr]),
       od: old_value,
-      oi: value
+      oi: value,
+      type: 'setAttribute'
     ])
 
   applySharedAction: (actions) ->
     _.each actions, (action) =>
-      object = _.reduce(
-        action.p
-        (current, next) =>
-          if _.isNumber(next)
-            current.models[next]
-          else if node = current[next]
-            node
-          else
-            current.set(next, action.oi)
-        this
-      )
+      @[action.type](action)
+
+  setAttribute: (action) ->
+    object = _.reduce(
+      action.p
+      (current, next) =>
+        if _.isNumber(next)
+          console.log "NUMBER"
+          current.models[next]
+        else if node = current[next]
+          console.log "NODE"
+          node
+        else
+          console.log "UPDATE VALUE"
+          current.set(next, action.oi)
+      this
+    )
 
 
 
