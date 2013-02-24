@@ -10,7 +10,6 @@
     function SharedModel(attributes, options) {
       var _this = this;
       SharedModel.__super__.constructor.call(this, attributes, options);
-      console.log(attributes, options);
       _.each(this.sharedAttributes, function(attr) {
         return _this.on("change:" + attr, function(model, value) {
           return _this.submitSharedAttr(attr, _this._previousAttributes[attr], value);
@@ -20,14 +19,21 @@
 
     SharedModel.prototype.updatePath = function() {
       if (this.collection) {
-        return this.collection.updatePath().concat([this.get('index')]);
+        return this.collection.updatePath().concat([this.index]);
       } else {
         return [];
       }
     };
 
     SharedModel.prototype.submitSharedAttr = function(attr, old_value, value) {
-      return console.log(this.updatePath().concat([attr]));
+      console.log(this.updatePath().concat([attr]));
+      return window.doc.submitOp([
+        {
+          p: this.updatePath().concat([attr]),
+          od: old_value,
+          oi: value
+        }
+      ]);
     };
 
     return SharedModel;
@@ -42,37 +48,14 @@
 
     function SharedCollection(models, options) {
       var _this = this;
-      this.on("reset", function() {
-        console.log("Reset !");
-        return _this.models.each(function(model, index) {
-          return model.index = index;
-        });
-      });
       SharedCollection.__super__.constructor.call(this, models, options);
+      this.each(function(model, index) {
+        return model.index = index;
+      });
     }
 
     SharedCollection.prototype.updatePath = function() {
       return this.parent.updatePath().concat([this.path]);
-    };
-
-    SharedCollection.prototype.createChildren = function(key, array, klass) {
-      var _this = this;
-      return this[key] = _.map(array, function(item, index) {
-        return _this.instanciateChildren(klass, item, {
-          index: index,
-          collection: _this
-        });
-      });
-    };
-
-    SharedCollection.prototype.instanciateChildren = function(klass, attributes, options) {
-      var f, o;
-      f = function() {};
-      f.prototype = klass.prototype;
-      o = new f();
-      klass.call(o, attributes, options);
-      o.constructor = klass;
-      return o;
     };
 
     return SharedCollection;
