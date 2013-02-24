@@ -18,4 +18,5 @@ class TrackCollection extends Backbone.SharedCollection
   initialize: (tracks, options) ->
     @parent = options.parent
 
+
 window.Project = Project
