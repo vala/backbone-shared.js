@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Backbone Shared Example</title>
+  </head>
+
+  <body>
+
+
+    <script type="text/javascript" src="lib/jquery.js"></script>
+    <script src="/channel/bcsocket.js"></script>
+    <script src="/share/share.js"></script>
+    <script src="/share/json.js"></script>
+    <script type="text/javascript" src="lib/underscore.js"></script>
+    <script type="text/javascript" src="lib/backbone.js"></script>
+    <script type="text/javascript" src="lib/backbone.shared.js"></script>
+    <script type="text/javascript" src="js/test.js"></script>
+    <script type="text/javascript">
+      $(function() {
+
+        var project = {
+          title: "Test Project",
+          tracks: [
+            { title: "Track 1" },
+            { title: "Track 2" },
+            { title: "Track 3" },
+            { title: "Track 4" }
+          ]
+        }
+
+        sharejs.open('testdoc', 'json', 'http://localhost:8000/channel', function(error, doc) {
+          if(error) console.log(error);
+          if (doc.created) {
+            doc.submitOp([{ p: [], oi: project }])
+          }
+          window.doc = doc
+          window.project = new Project(project)
+          window.project.tracks.models[0].set('title', 'Doowap')
+        })
+
+      });
+    </script>
+  </body>
+</html>

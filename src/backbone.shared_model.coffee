@@ -1,24 +1,21 @@
 class Backbone.SharedModel extends Backbone.Model
   constructor: (attributes, options) ->
-    _.each @sharedAttributes, (attr) =>
-      @on "change:#{ attr }", =>
-        @submitSharedAttr(attr, @_previousAttributes[attr], @get(attr))
-
-    @index = options.index if options && (options.index || options.index == 0)
-
     super(attributes, options)
+    console.log attributes, options
+    _.each @sharedAttributes, (attr) =>
+      @on "change:#{ attr }", (model, value) =>
+        @submitSharedAttr(attr, @_previousAttributes[attr], value)
 
   updatePath: ->
     if @collection
-      @collection.updatePath().concat([@index])
+      @collection.updatePath().concat([@get('index')])
     else
       []
 
-
   submitSharedAttr: (attr, old_value, value) ->
-    console.log @updatePath(), old_value, value
-    # console.log([
-    #   p: @updatePath().push(attr),
+    console.log @updatePath().concat([attr])
+    # window.doc.submitOp([
+    #   p: @updatePath().concat([attr]),
     #   od: old_value,
     #   oi: value
     # ])

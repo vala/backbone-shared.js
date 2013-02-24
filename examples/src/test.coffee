@@ -5,17 +5,17 @@ class Project extends Backbone.SharedModel
     @tracks = new TrackCollection(project.tracks, parent: this)
     @set(title: project.title)
 
-class TrackCollection extends Backbone.SharedCollection
-  path: 'tracks'
-
-  initialize: (tracks, options) ->
-    @parent = options.parent
-    @createChildren('tracks', tracks, Track)
-
 class Track extends Backbone.SharedModel
   sharedAttributes: ['title']
 
   initialize: (track, options) ->
     @set(title: track.title)
+
+class TrackCollection extends Backbone.SharedCollection
+  path: 'tracks'
+  model: Track
+
+  initialize: (tracks, options) ->
+    @parent = options.parent
 
 window.Project = Project

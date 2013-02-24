@@ -1,25 +1,21 @@
 fs     = require 'fs'
-{exec} = require 'child_process'
+{spawn, exec} = require 'child_process'
 
 appFiles  = [
-  'src/backbone.shared_model'
-  'src/backbone.shared_collection'
+  'src/backbone.shared_model.coffee'
+  'src/backbone.shared_collection.coffee'
 ]
 
 task 'build', 'Build single application file from source files', ->
-  appContents = new Array remaining = appFiles.length
-  for file, index in appFiles then do (file, index) ->
-    fs.readFile "#{file}.coffee", 'utf8', (err, fileContents) ->
-      throw err if err
-      appContents[index] = fileContents
-      process() if --remaining is 0
-  process = ->
-    fs.writeFile 'build/backbone.shared.coffee', appContents.join('\n\n'), 'utf8', (err) ->
-      throw err if err
-      exec 'coffee --compile build/backbone.shared.coffee', (err, stdout, stderr) ->
-        throw err if err
-        console.log stdout + stderr
+  source = spawn 'coffee', ['-cwj', 'backbone.shared.js'].concat(appFiles)
+  source.stdout.on 'data', (data) -> console.log data.toString().trim()
 
 
 task 'build:examples', 'Build examples', ->
-  exec 'coffee --compile --output examples/js examples/src/test.coffee'
+  examples = spawn 'coffee', ['-cw', '-o', 'examples/public/js', 'examples/src']
+  examples.stdout.on 'data', (data) -> console.log data.toString().trim()
+
+  source = spawn 'coffee', ['-cwj', 'examples/public/lib/backbone.shared.js'].concat(appFiles)
+  source.stdout.on 'data', (data) -> console.log data.toString().trim()
+
+  invoke('build')

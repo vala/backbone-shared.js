@@ -1,5 +1,12 @@
 class Backbone.SharedCollection extends Backbone.Collection
   path: null
+  constructor: (models, options) ->
+    @on "reset", =>
+      console.log "Reset !"
+      @models.each (model, index) =>
+        model.index = index
+
+    super(models, options)
 
   updatePath: ->
     @parent.updatePath().concat([@path])
