@@ -36,6 +36,26 @@
       ]);
     };
 
+    SharedModel.prototype.applySharedAction = function(actions) {
+      var findNode,
+        _this = this;
+      findNode = function(current, next) {
+        var node;
+        if (_.isNumber(next)) {
+          return current.models[next];
+        } else if (node = current[next]) {
+          return node;
+        } else {
+          return current.get(next);
+        }
+      };
+      return _.each(actions, function(action) {
+        var object;
+        object = _.reduce(action.p, findNode, _this);
+        return console.log("Found node : ", object);
+      });
+    };
+
     return SharedModel;
 
   })(Backbone.Model);

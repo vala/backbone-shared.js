@@ -19,3 +19,9 @@ task 'build:examples', 'Build examples', ->
   source.stdout.on 'data', (data) -> console.log data.toString().trim()
 
   invoke('build')
+
+task 'run:building', 'Run the example server while re-building everyting', ->
+  invoke('build:examples')
+
+  app = spawn 'node', ['examples/app.js']
+  app.stdout.on 'data', (data) -> console.log data.toString().trim()

@@ -18,3 +18,17 @@ class Backbone.SharedModel extends Backbone.Model
       od: old_value,
       oi: value
     ])
+
+  applySharedAction: (actions) ->
+    findNode = (current, next) =>
+      if _.isNumber(next)
+        current.models[next]
+      else if node = current[next]
+        node
+      else
+        current.get(next)
+
+
+    _.each actions, (action) =>
+      object = _.reduce action.p, findNode, this
+      console.log "Found node : ", object

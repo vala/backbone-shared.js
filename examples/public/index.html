@@ -35,6 +35,10 @@
           }
           window.doc = doc
           window.project = new Project(doc.snapshot)
+
+          doc.on('change', function(a, b, c) {
+            window.project.applySharedAction(a)
+          })
         })
 
       });
