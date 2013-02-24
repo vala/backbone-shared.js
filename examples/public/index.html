@@ -34,8 +34,7 @@
             doc.submitOp([{ p: [], oi: project }])
           }
           window.doc = doc
-          window.project = new Project(project)
-          window.project.tracks.models[0].set('title', 'Doowap')
+          window.project = new Project(doc.snapshot)
         })
 
       });
