@@ -6,17 +6,28 @@ appFiles  = [
   'src/backbone.shared_collection.coffee'
 ]
 
+# ANSI Terminal Colors.
+bold = red = green = reset = ''
+unless process.env.NODE_DISABLE_COLORS
+  bold  = '\x1B[0;1m'
+  red   = '\x1B[0;31m'
+  green = '\x1B[0;32m'
+  reset = '\x1B[0m'
+
+log = (message, color, explanation) ->
+  console.log color + message + reset + ' ' + (explanation or '')
+
 task 'build', 'Build single application file from source files', ->
   source = spawn 'coffee', ['-cwj', 'backbone.shared.js'].concat(appFiles)
-  source.stdout.on 'data', (data) -> console.log data.toString().trim()
+  source.stdout.on 'data', (data) -> log data.toString().trim(), red
 
 
 task 'build:examples', 'Build examples', ->
   examples = spawn 'coffee', ['-cw', '-o', 'examples/public/js', 'examples/src']
-  examples.stdout.on 'data', (data) -> console.log data.toString().trim()
+  examples.stdout.on 'data', (data) -> log data.toString().trim(), green
 
   source = spawn 'coffee', ['-cwj', 'examples/public/lib/backbone.shared.js'].concat(appFiles)
-  source.stdout.on 'data', (data) -> console.log data.toString().trim()
+  source.stdout.on 'data', (data) -> log data.toString().trim(), green
 
   invoke('build')
 
@@ -24,4 +35,4 @@ task 'run:building', 'Run the example server while re-building everyting', ->
   invoke('build:examples')
 
   app = spawn 'node', ['examples/app.js']
-  app.stdout.on 'data', (data) -> console.log data.toString().trim()
+  app.stdout.on 'data', (data) -> log data.toString().trim(), bold
