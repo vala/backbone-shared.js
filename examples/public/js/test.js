@@ -12,7 +12,7 @@
       return Project.__super__.constructor.apply(this, arguments);
     }
 
-    Project.prototype.sharedAttributes = ['title'];
+    Project.prototype.sharedAttributesKeys = ['title'];
 
     Project.prototype.initialize = function(project) {
       this.tracks = new TrackCollection(project.tracks, {
@@ -35,7 +35,7 @@
       return Track.__super__.constructor.apply(this, arguments);
     }
 
-    Track.prototype.sharedAttributes = ['title'];
+    Track.prototype.sharedAttributesKeys = ['title'];
 
     Track.prototype.initialize = function(track, options) {
       return this.set({
@@ -91,10 +91,15 @@
       this.model.on('change', function() {
         return _this.render();
       });
-      return this.tracks = _.map(this.model.tracks.models, function(track) {
-        return new TrackView({
-          model: track
-        });
+      this.tracks = [];
+      _.each(this.model.tracks.models, function(track) {
+        return _this.trackAdded(track);
+      });
+      $('#add-track-btn').on('click', function() {
+        return _this.addTrack();
+      });
+      return this.model.tracks.on("add", function(track) {
+        return _this.trackAdded(track);
       });
     };
 
@@ -102,7 +107,6 @@
       var _this = this;
       this.$el.html(this.template(this.model.attributes));
       if (!this.created) {
-        console.log("tuff");
         _.each(this.tracks, function(track) {
           return track.render(_this);
         });
@@ -114,6 +118,25 @@
       return this.model.set({
         title: e.currentTarget.value
       });
+    };
+
+    ProjectView.prototype.addTrack = function() {
+      return this.model.tracks.add([
+        {
+          title: "New track"
+        }
+      ]);
+    };
+
+    ProjectView.prototype.trackAdded = function(track) {
+      var view;
+      view = new TrackView({
+        model: track
+      });
+      this.tracks.push(view);
+      if (this.created) {
+        return view.render(this);
+      }
     };
 
     return ProjectView;

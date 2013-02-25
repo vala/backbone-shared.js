@@ -19,7 +19,7 @@ log = (message, color, explanation) ->
 
 task 'build', 'Build single application file from source files', ->
   source = spawn 'coffee', ['-cwj', 'backbone.shared.js'].concat(appFiles)
-  source.stdout.on 'data', (data) -> log data.toString().trim(), red
+  source.stdout.on 'data', (data) -> log data.toString().trim(), green
 
 
 task 'build:examples', 'Build examples', ->

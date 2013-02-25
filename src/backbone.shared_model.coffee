@@ -1,9 +1,9 @@
 class Backbone.SharedModel extends Backbone.Model
   constructor: (attributes, options) ->
     super(attributes, options)
-    _.each @sharedAttributes, (attr) =>
+    _.each @sharedAttributesKeys, (attr) =>
       @on "change:#{ attr }", (model, value) =>
-        @submitSharedAttr(attr, @_previousAttributes[attr], value)
+        @updateSharedAttr(attr, @_previousAttributes[attr], value)
 
   updatePath: ->
     if @collection
@@ -11,34 +11,50 @@ class Backbone.SharedModel extends Backbone.Model
     else
       []
 
-  submitSharedAttr: (attr, old_value, value) ->
-    console.log @updatePath().concat([attr])
+  sharedAttributes: ->
+    _.pick(@attributes, @sharedAttributesKeys)
+
+  updateSharedAttr: (attr, old_value, value) ->
+    console.log "Submit op : ", @updatePath().concat([attr]), " - oi :", value
     window.doc.submitOp([
       p: @updatePath().concat([attr]),
       od: old_value,
-      oi: value,
-      type: 'setAttribute'
+      oi: value
     ])
 
   applySharedAction: (actions) ->
     _.each actions, (action) =>
-      @[action.type](action)
+      if action.oi
+        @setAttribute(action)
 
   setAttribute: (action) ->
-    object = _.reduce(
+    _.reduce(
       action.p
       (current, next) =>
         if _.isNumber(next)
-          console.log "NUMBER"
           current.models[next]
         else if node = current[next]
-          console.log "NODE"
           node
         else
-          console.log "UPDATE VALUE"
           current.set(next, action.oi)
       this
     )
+
+  insertModel: (action) ->
+    _.reduce(
+      action.p
+      (current, next) =>
+        switch
+          when _.isNumber(next)
+            if (model = current.models[next])
+              model
+            else
+              current.add(action.li)
+          when (node = current[next])
+            node
+      this
+    )
+
 
 
 
