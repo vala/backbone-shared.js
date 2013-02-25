@@ -59,10 +59,6 @@
 
     TrackCollection.prototype.model = Track;
 
-    TrackCollection.prototype.initialize = function(tracks, options) {
-      return this.parent = options.parent;
-    };
-
     return TrackCollection;
 
   })(Backbone.SharedCollection);
@@ -155,18 +151,22 @@
 
     TrackView.prototype.appended = false;
 
-    TrackView.prototype.template = _.template("    <input type='text' name='tracks[title][]' value='<%= title %>' class='track-title'><br>  ");
+    TrackView.prototype.template = _.template("    <input type='text' name='tracks[title][]' value='<%= title %>' class='track-title'>    <a href='#' class='delete-track-btn'>Delete</a>    <br>  ");
 
     TrackView.prototype.events = {
-      'keyup .track-title': 'updateTitle'
+      'keyup .track-title': 'updateTitle',
+      'click .delete-track-btn': 'destroyTrack'
     };
 
     TrackView.prototype.initialize = function() {
       var _this = this;
       this.model = this.options.model;
       this.container = $('#tracks');
-      return this.model.on('change', function() {
+      this.model.on('change', function() {
         return _this.render();
+      });
+      return this.model.on('destroy', function() {
+        return _this.cleanView();
       });
     };
 
@@ -182,6 +182,14 @@
       return this.model.set({
         title: e.currentTarget.value
       });
+    };
+
+    TrackView.prototype.destroyTrack = function(e) {
+      return this.model.destroy();
+    };
+
+    TrackView.prototype.cleanView = function() {
+      return this.$el.remove();
     };
 
     return TrackView;
