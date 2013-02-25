@@ -88,9 +88,7 @@
     ProjectView.prototype.initialize = function() {
       var _this = this;
       this.model = this.options.model;
-      this.model.on('change', function() {
-        return _this.render();
-      });
+      this.model.on('change:title', this.titleChanged, this);
       return this.tracks = _.map(this.model.tracks.models, function(track) {
         return new TrackView({
           model: track
@@ -108,6 +106,10 @@
         });
         return this.created = true;
       }
+    };
+
+    ProjectView.prototype.titleChanged = function(model, title) {
+      return this.$el.find(".project-title").val(title);
     };
 
     ProjectView.prototype.updateTitle = function(e) {
@@ -139,12 +141,9 @@
     };
 
     TrackView.prototype.initialize = function() {
-      var _this = this;
       this.model = this.options.model;
       this.container = $('#tracks');
-      return this.model.on('change', function() {
-        return _this.render();
-      });
+      return this.model.on('change:title', this.titleChanged, this);
     };
 
     TrackView.prototype.render = function() {
@@ -153,6 +152,11 @@
         this.appended = true;
       }
       return this.$el.html(this.template(this.model.attributes));
+    };
+
+    TrackView.prototype.titleChanged = function(model, title) {
+      console.log(title);
+      return this.$el.find(".track-title").val(title);
     };
 
     TrackView.prototype.updateTitle = function(e) {

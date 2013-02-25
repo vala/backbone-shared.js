@@ -34,7 +34,7 @@ class ProjectView extends Backbone.View
 
   initialize: ->
     @model = @options.model
-    @model.on 'change', => @render()
+    @model.on 'change:title', @titleChanged, @
     @tracks = _.map @model.tracks.models, (track) =>
       new TrackView(model: track)
 
@@ -44,6 +44,9 @@ class ProjectView extends Backbone.View
       console.log "tuff"
       _.each @tracks, (track) => track.render(this)
       @created = true
+
+  titleChanged : (model, title) ->
+    @$el.find(".project-title").val(title)
 
   updateTitle: (e) ->
     @model.set(title: e.currentTarget.value)
@@ -63,13 +66,17 @@ class TrackView extends Backbone.View
   initialize: ->
     @model = @options.model
     @container = $('#tracks')
-    @model.on 'change', => @render()
+    @model.on 'change:title', @titleChanged, @
 
   render: ->
     unless @appended
       @$el.appendTo(@container)
       @appended = true
     @$el.html(@template(@model.attributes))
+
+  titleChanged : (model, title) ->
+    console.log title
+    @$el.find(".track-title").val(title)
 
   updateTitle: (e) ->
     @model.set(title: e.currentTarget.value)
