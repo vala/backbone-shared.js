@@ -1,6 +1,9 @@
 class Backbone.SharedModel extends Backbone.Model
   constructor: (attributes, options) ->
     super(attributes, options)
+    @on "indexed", => @indexed()
+    @on "destroy.share", (options) => @destroyed(options)
+
     _.each @sharedAttributesKeys, (attr) =>
       @on "change:#{ attr }", (model, value) =>
         @updateSharedAttr(attr, @_previousAttributes[attr], value)
@@ -11,11 +14,19 @@ class Backbone.SharedModel extends Backbone.Model
     else
       []
 
+  indexed: ->
+    @subdoc = window.doc.at(@updatePath())
+
   sharedAttributes: ->
     _.pick(@attributes, @sharedAttributesKeys)
 
+  destroy: (options) ->
+    if options && options.fromSharedOp
+      super(options)
+    else
+      @trigger('destroy.share')
+
   updateSharedAttr: (attr, old_value, value) ->
-    console.log "Submit op : ", @updatePath().concat([attr]), " - oi :", value
     window.doc.submitOp([
       p: @updatePath().concat([attr]),
       od: old_value,
@@ -26,6 +37,8 @@ class Backbone.SharedModel extends Backbone.Model
     _.each actions, (action) =>
       if action.oi
         @setAttribute(action)
+      if action.ld
+        @destroyModel(action)
 
   setAttribute: (action) ->
     _.reduce(
@@ -40,21 +53,21 @@ class Backbone.SharedModel extends Backbone.Model
       this
     )
 
-  insertModel: (action) ->
-    _.reduce(
+  destroyed: (options) ->
+    @subdoc.remove()
+
+  destroyModel: (action) ->
+    model = _.reduce(
       action.p
       (current, next) =>
-        switch
-          when _.isNumber(next)
-            if (model = current.models[next])
-              model
-            else
-              current.add(action.li)
-          when (node = current[next])
-            node
+        if _.isNumber(next)
+          current.models[next]
+        else
+          current[next]
       this
     )
-
+    console.log "Destroy from shared action : ", action, model
+    model.destroy(fromSharedOp: true)
 
 
 

@@ -5,7 +5,6 @@ class Project extends Backbone.SharedModel
     @tracks = new TrackCollection(project.tracks, parent: this)
     @set(title: project.title)
 
-
 class Track extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
 
@@ -15,9 +14,6 @@ class Track extends Backbone.SharedModel
 class TrackCollection extends Backbone.SharedCollection
   path: 'tracks'
   model: Track
-
-  initialize: (tracks, options) ->
-    @parent = options.parent
 
 class ProjectView extends Backbone.View
   el: $('#project')
@@ -68,16 +64,21 @@ class TrackView extends Backbone.View
   appended: false
 
   template: _.template("
-    <input type='text' name='tracks[title][]' value='<%= title %>' class='track-title'><br>
+    <input type='text' name='tracks[title][]' value='<%= title %>' class='track-title'>
+    <a href='#' class='delete-track-btn'>Delete</a>
+    <br>
   ")
 
   events:
     'keyup .track-title': 'updateTitle'
+    'click .delete-track-btn': 'destroyTrack'
+
 
   initialize: ->
     @model = @options.model
     @container = $('#tracks')
     @model.on 'change:title', @titleChanged, @
+    @model.on 'destroy', => @cleanView()
 
   render: ->
     unless @appended
@@ -92,6 +93,11 @@ class TrackView extends Backbone.View
   updateTitle: (e) ->
     @model.set(title: e.currentTarget.value)
 
+  destroyTrack: (e) ->
+    @model.destroy()
+
+  cleanView: ->
+    @$el.remove()
 
 window.Project = Project
 window.ProjectView = ProjectView
