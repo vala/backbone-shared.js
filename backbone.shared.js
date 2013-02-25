@@ -10,9 +10,9 @@
     function SharedModel(attributes, options) {
       var _this = this;
       SharedModel.__super__.constructor.call(this, attributes, options);
-      _.each(this.sharedAttributes, function(attr) {
+      _.each(this.sharedAttributesKeys, function(attr) {
         return _this.on("change:" + attr, function(model, value) {
-          return _this.submitSharedAttr(attr, _this._previousAttributes[attr], value);
+          return _this.updateSharedAttr(attr, _this._previousAttributes[attr], value);
         });
       });
     }
@@ -25,14 +25,17 @@
       }
     };
 
-    SharedModel.prototype.submitSharedAttr = function(attr, old_value, value) {
-      console.log(this.updatePath().concat([attr]));
+    SharedModel.prototype.sharedAttributes = function() {
+      return _.pick(this.attributes, this.sharedAttributesKeys);
+    };
+
+    SharedModel.prototype.updateSharedAttr = function(attr, old_value, value) {
+      console.log("Submit op : ", this.updatePath().concat([attr]), " - oi :", value);
       return window.doc.submitOp([
         {
           p: this.updatePath().concat([attr]),
           od: old_value,
-          oi: value,
-          type: 'setAttribute'
+          oi: value
         }
       ]);
     };
@@ -40,24 +43,40 @@
     SharedModel.prototype.applySharedAction = function(actions) {
       var _this = this;
       return _.each(actions, function(action) {
-        return _this[action.type](action);
+        if (action.oi) {
+          return _this.setAttribute(action);
+        }
       });
     };
 
     SharedModel.prototype.setAttribute = function(action) {
-      var object,
-        _this = this;
-      return object = _.reduce(action.p, function(current, next) {
+      var _this = this;
+      return _.reduce(action.p, function(current, next) {
         var node;
         if (_.isNumber(next)) {
-          console.log("NUMBER");
           return current.models[next];
         } else if (node = current[next]) {
-          console.log("NODE");
           return node;
         } else {
-          console.log("UPDATE VALUE");
           return current.set(next, action.oi);
+        }
+      }, this);
+    };
+
+    SharedModel.prototype.insertModel = function(action) {
+      var _this = this;
+      return _.reduce(action.p, function(current, next) {
+        var model, node;
+        switch (false) {
+          case !_.isNumber(next):
+            if ((model = current.models[next])) {
+              return model;
+            } else {
+              return current.add(action.li);
+            }
+            break;
+          case !(node = current[next]):
+            return node;
         }
       }, this);
     };
@@ -75,13 +94,47 @@
     function SharedCollection(models, options) {
       var _this = this;
       SharedCollection.__super__.constructor.call(this, models, options);
-      this.each(function(model, index) {
-        return model.index = index;
+      this.processIndexes();
+      this.on("add", function() {
+        return _this.processIndexes();
+      });
+      this.subdoc = window.doc.at(this.updatePath());
+      this.on("add.share", function(model) {
+        return _this.modelAdded(model);
+      });
+      this.subdoc.on("insert", function(pos, data) {
+        return _this.add(data, {
+          fromSharedOp: true
+        });
       });
     }
 
     SharedCollection.prototype.updatePath = function() {
       return this.parent.updatePath().concat([this.path]);
+    };
+
+    SharedCollection.prototype.processIndexes = function() {
+      var _this = this;
+      return this.each(function(model, index) {
+        return model.index = index;
+      });
+    };
+
+    SharedCollection.prototype.modelAdded = function(model) {
+      return this.subdoc.push(model.sharedAttributes());
+    };
+
+    SharedCollection.prototype.add = function(models, options) {
+      var triggerSharedAdd,
+        _this = this;
+      triggerSharedAdd = function(model, coll, opt) {
+        if (!(options && options.fromSharedOp)) {
+          return _this.trigger('add.share', model, coll, opt);
+        }
+      };
+      this.on("add", triggerSharedAdd);
+      SharedCollection.__super__.add.call(this, models, options);
+      return this.off("add", triggerSharedAdd);
     };
 
     return SharedCollection;

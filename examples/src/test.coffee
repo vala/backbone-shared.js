@@ -1,5 +1,5 @@
 class Project extends Backbone.SharedModel
-  sharedAttributes: ['title']
+  sharedAttributesKeys: ['title']
 
   initialize: (project) ->
     @tracks = new TrackCollection(project.tracks, parent: this)
@@ -7,7 +7,7 @@ class Project extends Backbone.SharedModel
 
 
 class Track extends Backbone.SharedModel
-  sharedAttributes: ['title']
+  sharedAttributesKeys: ['title']
 
   initialize: (track, options) ->
     @set(title: track.title)
@@ -18,7 +18,6 @@ class TrackCollection extends Backbone.SharedCollection
 
   initialize: (tracks, options) ->
     @parent = options.parent
-
 
 class ProjectView extends Backbone.View
   el: $('#project')
@@ -35,13 +34,16 @@ class ProjectView extends Backbone.View
   initialize: ->
     @model = @options.model
     @model.on 'change:title', @titleChanged, @
-    @tracks = _.map @model.tracks.models, (track) =>
-      new TrackView(model: track)
+    @tracks = []
+    # Build tracks view
+    _.each @model.tracks.models, (track) => @trackAdded(track)
+    # Tracks collection
+    $('#add-track-btn').on 'click', => @addTrack()
+    @model.tracks.on "add", (track) => @trackAdded(track)
 
   render: ->
     @$el.html(@template(@model.attributes))
     unless @created
-      console.log "tuff"
       _.each @tracks, (track) => track.render(this)
       @created = true
 
@@ -50,6 +52,15 @@ class ProjectView extends Backbone.View
 
   updateTitle: (e) ->
     @model.set(title: e.currentTarget.value)
+
+  addTrack: ->
+    @model.tracks.add([title: "New track"])
+
+  trackAdded: (track) ->
+    view = new TrackView(model: track)
+    @tracks.push(view)
+    view.render(this) if @created
+
 
 
 class TrackView extends Backbone.View
