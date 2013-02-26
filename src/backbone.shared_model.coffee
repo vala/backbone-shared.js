@@ -67,7 +67,6 @@ class Backbone.SharedModel extends Backbone.Model
           current[next]
       this
     )
-    console.log "Destroy from shared action : ", action, model
     model.destroy(fromSharedOp: true)
 
 

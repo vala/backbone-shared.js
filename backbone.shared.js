@@ -98,7 +98,6 @@
           return current[next];
         }
       }, this);
-      console.log("Destroy from shared action : ", action, model);
       return model.destroy({
         fromSharedOp: true
       });

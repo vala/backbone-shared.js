@@ -1,3 +1,6 @@
+#
+# A shared collection
+#
 class Backbone.SharedCollection extends Backbone.Collection
   path: null
 

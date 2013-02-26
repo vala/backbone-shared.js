@@ -1,18 +1,34 @@
+# Models
 class Project extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
 
-  initialize: (project, opts) ->
-    @tracks = new TrackCollection(project.tracks, parent: this, doc: opts.doc)
+  initialize: (project, options) ->
+    @tracks = new TrackCollection(project.tracks, parent: this, doc: options.doc)
+
 
 class Track extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
 
   initialize: (track, options) ->
+    # FIXME: does not work
+    # @clips = new ClipCollection(track.clips, parent: this, doc: options.doc)
 
+
+class Clip extends Backbone.SharedModel
+  sharedAttributesKeys: ['position']
+
+  initialize: (clip, option) ->
+
+# Collections
 class TrackCollection extends Backbone.SharedCollection
   path: 'tracks'
   model: Track
 
+class ClipCollection extends Backbone.SharedCollection
+  path: 'clips'
+  model: Clip
+
+# Views
 class ProjectView extends Backbone.View
   el: $('#project')
 
