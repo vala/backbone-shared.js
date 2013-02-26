@@ -10,13 +10,13 @@
     function SharedModel(attributes, options) {
       var _this = this;
       SharedModel.__super__.constructor.call(this, attributes, options);
-      this.doc = options.doc || options.collection.doc;
-      this.on("indexed", function() {
-        return _this.indexed();
-      });
+      this.doc = options.doc;
       this.on("destroy.share", function(options) {
         return _this.destroyed(options);
       });
+      if (!this.collection) {
+        this.initializeSubTree();
+      }
       _.each(this.sharedAttributesKeys, function(attr) {
         return _this.on("change:" + attr, function(model, value) {
           return _this.updateSharedAttr(attr, _this._previousAttributes[attr], value);
@@ -24,16 +24,32 @@
       });
     }
 
+    SharedModel.prototype.initializeSubTree = function() {
+      var _this = this;
+      if (this.collection) {
+        this.doc = this.collection.doc;
+        this.subdoc = this.doc.at(this.updatePath());
+      }
+      if (this.sharedCollections && this.sharedCollections.length > 0) {
+        return _.each(this.sharedCollections, function(collectionKey) {
+          var collection;
+          collection = _this[collectionKey];
+          collection.parent = _this;
+          collection.setDoc(_this.doc);
+          collection.processIndexes();
+          return _.each(collection.models, function(model) {
+            return model.initializeSubTree();
+          });
+        });
+      }
+    };
+
     SharedModel.prototype.updatePath = function() {
       if (this.collection) {
         return this.collection.updatePath().concat([this.index]);
       } else {
         return [];
       }
-    };
-
-    SharedModel.prototype.indexed = function() {
-      return this.subdoc = this.doc.at(this.updatePath());
     };
 
     SharedModel.prototype.sharedAttributes = function() {
@@ -116,22 +132,24 @@
     function SharedCollection(models, options) {
       var _this = this;
       SharedCollection.__super__.constructor.call(this, models, options);
-      this.parent = options.parent;
-      this.doc = options.doc;
-      this.processIndexes();
       this.on("add destroy", function() {
         return _this.processIndexes();
       });
-      this.subdoc = this.doc.at(this.updatePath());
       this.on("add.share", function(model) {
         return _this.modelAdded(model);
       });
-      this.subdoc.on("insert", function(pos, data) {
+    }
+
+    SharedCollection.prototype.setDoc = function(doc) {
+      var _this = this;
+      this.doc = doc;
+      this.subdoc = this.doc.at(this.updatePath());
+      return this.subdoc.on("insert", function(pos, data) {
         return _this.add(data, {
           fromSharedOp: true
         });
       });
-    }
+    };
 
     SharedCollection.prototype.updatePath = function() {
       return this.parent.updatePath().concat([this.path]);

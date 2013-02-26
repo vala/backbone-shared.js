@@ -6,17 +6,14 @@ class Backbone.SharedCollection extends Backbone.Collection
 
   constructor: (models, options) ->
     super(models, options)
-    @parent = options.parent
-    @doc = options.doc
-    # Process indexes
-    @processIndexes()
     # Reprocess array index each time a model is added
     @on "add destroy", => @processIndexes()
-    # Get shareJS collection subdoc
-    @subdoc = @doc.at(@updatePath())
-
     # Listen an insertion to be shared
     @on "add.share", (model) => @modelAdded(model)
+
+  # Get shareJS collection subdoc
+  setDoc: (@doc) ->
+    @subdoc = @doc.at(@updatePath())
     # Listen to ShareJS model insertions
     @subdoc.on "insert", (pos, data) => @add(data, fromSharedOp: true)
 

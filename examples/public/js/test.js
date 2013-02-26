@@ -14,9 +14,10 @@
 
     Project.prototype.sharedAttributesKeys = ['title'];
 
+    Project.prototype.sharedCollections = ['tracks'];
+
     Project.prototype.initialize = function(project, options) {
       return this.tracks = new TrackCollection(project.tracks, {
-        parent: this,
         doc: options.doc
       });
     };
@@ -35,7 +36,11 @@
 
     Track.prototype.sharedAttributesKeys = ['title'];
 
-    Track.prototype.initialize = function(track, options) {};
+    Track.prototype.sharedCollections = ['clips'];
+
+    Track.prototype.initialize = function(track, options) {
+      return this.clips = new ClipCollection(track.clips);
+    };
 
     return Track;
 
