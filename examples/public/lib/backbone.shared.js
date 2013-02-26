@@ -10,6 +10,7 @@
     function SharedModel(attributes, options) {
       var _this = this;
       SharedModel.__super__.constructor.call(this, attributes, options);
+      this.doc = options.doc || options.collection.doc;
       this.on("indexed", function() {
         return _this.indexed();
       });
@@ -32,7 +33,7 @@
     };
 
     SharedModel.prototype.indexed = function() {
-      return this.subdoc = window.doc.at(this.updatePath());
+      return this.subdoc = this.doc.at(this.updatePath());
     };
 
     SharedModel.prototype.sharedAttributes = function() {
@@ -48,7 +49,7 @@
     };
 
     SharedModel.prototype.updateSharedAttr = function(attr, old_value, value) {
-      return window.doc.submitOp([
+      return this.doc.submitOp([
         {
           p: this.updatePath().concat([attr]),
           od: old_value,
@@ -117,11 +118,12 @@
       var _this = this;
       SharedCollection.__super__.constructor.call(this, models, options);
       this.parent = options.parent;
+      this.doc = options.doc;
       this.processIndexes();
       this.on("add destroy", function() {
         return _this.processIndexes();
       });
-      this.subdoc = window.doc.at(this.updatePath());
+      this.subdoc = this.doc.at(this.updatePath());
       this.on("add.share", function(model) {
         return _this.modelAdded(model);
       });

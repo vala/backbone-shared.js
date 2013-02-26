@@ -1,6 +1,7 @@
 class Backbone.SharedModel extends Backbone.Model
   constructor: (attributes, options) ->
     super(attributes, options)
+    @doc = options.doc || options.collection.doc
     @on "indexed", => @indexed()
     @on "destroy.share", (options) => @destroyed(options)
 
@@ -15,7 +16,7 @@ class Backbone.SharedModel extends Backbone.Model
       []
 
   indexed: ->
-    @subdoc = window.doc.at(@updatePath())
+    @subdoc = @doc.at(@updatePath())
 
   sharedAttributes: ->
     _.pick(@attributes, @sharedAttributesKeys)
@@ -27,7 +28,7 @@ class Backbone.SharedModel extends Backbone.Model
       @trigger('destroy.share')
 
   updateSharedAttr: (attr, old_value, value) ->
-    window.doc.submitOp([
+    @doc.submitOp([
       p: @updatePath().concat([attr]),
       od: old_value,
       oi: value

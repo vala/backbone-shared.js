@@ -1,15 +1,13 @@
 class Project extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
 
-  initialize: (project) ->
-    @tracks = new TrackCollection(project.tracks, parent: this)
-    @set(title: project.title)
+  initialize: (project, opts) ->
+    @tracks = new TrackCollection(project.tracks, parent: this, doc: opts.doc)
 
 class Track extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
 
   initialize: (track, options) ->
-    @set(title: track.title)
 
 class TrackCollection extends Backbone.SharedCollection
   path: 'tracks'
@@ -87,7 +85,6 @@ class TrackView extends Backbone.View
     @$el.html(@template(@model.attributes))
 
   titleChanged : (model, title) ->
-    console.log title
     @$el.find(".track-title").val(title)
 
   updateTitle: (e) ->

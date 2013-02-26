@@ -43,14 +43,13 @@
             doc.submitOp([{ p: [], oi: project }]);
           }
 
-          window.doc = doc;
-          window.project = new Project(doc.snapshot);
+          window.project = new Project(doc.snapshot, {doc:doc});
           window.project_view = new ProjectView({ model: window.project });
 
           window.project_view.render();
 
-          doc.on('change', function(a, b, c) {
-            window.project.applySharedAction(a);
+          doc.on('change', function(op) {
+            window.project.applySharedAction(op);
           });
         })
 

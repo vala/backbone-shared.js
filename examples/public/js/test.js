@@ -14,12 +14,10 @@
 
     Project.prototype.sharedAttributesKeys = ['title'];
 
-    Project.prototype.initialize = function(project) {
-      this.tracks = new TrackCollection(project.tracks, {
-        parent: this
-      });
-      return this.set({
-        title: project.title
+    Project.prototype.initialize = function(project, opts) {
+      return this.tracks = new TrackCollection(project.tracks, {
+        parent: this,
+        doc: opts.doc
       });
     };
 
@@ -37,11 +35,7 @@
 
     Track.prototype.sharedAttributesKeys = ['title'];
 
-    Track.prototype.initialize = function(track, options) {
-      return this.set({
-        title: track.title
-      });
-    };
+    Track.prototype.initialize = function(track, options) {};
 
     return Track;
 
@@ -179,7 +173,6 @@
     };
 
     TrackView.prototype.titleChanged = function(model, title) {
-      console.log(title);
       return this.$el.find(".track-title").val(title);
     };
 
