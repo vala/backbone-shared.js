@@ -171,6 +171,7 @@
       var triggerSharedAdd,
         _this = this;
       triggerSharedAdd = function(model, coll, opt) {
+        model.initializeSubTree();
         if (!(options && options.fromSharedOp)) {
           return _this.trigger('add.share', model, coll, opt);
         }
