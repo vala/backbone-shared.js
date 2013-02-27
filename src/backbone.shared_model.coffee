@@ -10,7 +10,6 @@ class Backbone.SharedModel extends Backbone.Model
     # Set doc if not root node
     if @collection
       @doc = @collection.doc
-      @subdoc = @doc.at(@updatePath())
     # If we have shared sub-collections, initialize them and setup
     # needed attributes
     if @sharedCollections
@@ -22,7 +21,7 @@ class Backbone.SharedModel extends Backbone.Model
         @on "change:#{ attr }", (model, value) =>
           @updateSharedAttr(attr, @_previousAttributes[attr], value)
 
-    @on "destroy.share", (options) => @destroyed(options)
+    @on "destroy.share", @destroyed, this
 
   updatePath: ->
     if @collection
@@ -67,7 +66,7 @@ class Backbone.SharedModel extends Backbone.Model
     )
 
   destroyed: (options) ->
-    @subdoc.remove()
+    @doc.at(@updatePath()).remove()
 
   destroyModel: (action) ->
     model = _.reduce(
@@ -80,6 +79,3 @@ class Backbone.SharedModel extends Backbone.Model
       this
     )
     model.destroy(fromSharedOp: true)
-
-
-

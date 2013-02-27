@@ -19,7 +19,6 @@
       var _this = this;
       if (this.collection) {
         this.doc = this.collection.doc;
-        this.subdoc = this.doc.at(this.updatePath());
       }
       if (this.sharedCollections) {
         _.each(this.sharedCollections, function(collectionKey) {
@@ -36,9 +35,7 @@
           });
         });
       }
-      return this.on("destroy.share", function(options) {
-        return _this.destroyed(options);
-      });
+      return this.on("destroy.share", this.destroyed, this);
     };
 
     SharedModel.prototype.updatePath = function() {
@@ -98,7 +95,7 @@
     };
 
     SharedModel.prototype.destroyed = function(options) {
-      return this.subdoc.remove();
+      return this.doc.at(this.updatePath()).remove();
     };
 
     SharedModel.prototype.destroyModel = function(action) {
