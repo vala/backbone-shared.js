@@ -17,10 +17,14 @@ unless process.env.NODE_DISABLE_COLORS
 log = (message, color, explanation) ->
   console.log color + message + reset + ' ' + (explanation or '')
 
+uglify = (input, output) ->
+  min = spawn 'uglifyjs', ['-v', '--stats', input, '-o', output]
+  min.stderr.on 'data', (data) -> log data.toString().trim(), bold
+
 task 'build', 'Build single application file from source files', ->
   source = spawn 'coffee', ['-cwj', 'backbone.shared.js'].concat(appFiles)
   source.stdout.on 'data', (data) -> log data.toString().trim(), green
-
+  uglify 'backbone.shared.js', 'backbone.shared-min.js'
 
 task 'build:examples', 'Build examples', ->
   examples = spawn 'coffee', ['-cw', '-o', 'examples/public/js', 'examples/src']
@@ -29,6 +33,8 @@ task 'build:examples', 'Build examples', ->
   source = spawn 'coffee', ['-cwj', 'examples/public/lib/backbone.shared.js'].concat(appFiles)
   source.stdout.on 'data', (data) -> log data.toString().trim(), green
 
+  uglify 'backbone.shared.js', 'examples/public/lib/backbone.shared-min.js'
+
   invoke('build')
 
 task 'run:building', 'Run the example server while re-building everyting', ->
@@ -36,3 +42,4 @@ task 'run:building', 'Run the example server while re-building everyting', ->
 
   app = spawn 'node', ['examples/app.js']
   app.stdout.on 'data', (data) -> log data.toString().trim(), bold
+

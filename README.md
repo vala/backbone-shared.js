@@ -1,3 +1,3 @@
 # Backbone Shared
 
-Under construction !
+`npm install -g uglify-js`
