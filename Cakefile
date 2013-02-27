@@ -33,8 +33,6 @@ task 'build:examples', 'Build examples', ->
   source = spawn 'coffee', ['-cwj', 'examples/public/lib/backbone.shared.js'].concat(appFiles)
   source.stdout.on 'data', (data) -> log data.toString().trim(), green
 
-  uglify 'backbone.shared.js', 'examples/public/lib/backbone.shared-min.js'
-
   invoke('build')
 
 task 'run:building', 'Run the example server while re-building everyting', ->

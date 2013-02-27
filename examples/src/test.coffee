@@ -14,11 +14,8 @@ class Track extends Backbone.SharedModel
   initialize: (track, options) ->
     @clips = new ClipCollection(track.clips)
 
-
 class Clip extends Backbone.SharedModel
   sharedAttributesKeys: ['position']
-
-  initialize: (clip, option) ->
 
 # Collections
 class TrackCollection extends Backbone.SharedCollection

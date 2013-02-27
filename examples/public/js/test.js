@@ -54,8 +54,6 @@
 
     Clip.prototype.sharedAttributesKeys = ['position'];
 
-    Clip.prototype.initialize = function(clip, option) {};
-
     return Clip;
 
   })(Backbone.SharedModel);
