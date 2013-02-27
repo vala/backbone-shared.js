@@ -8,40 +8,37 @@
     __extends(SharedModel, _super);
 
     function SharedModel(attributes, options) {
-      var _this = this;
       SharedModel.__super__.constructor.call(this, attributes, options);
-      this.doc = options.doc;
-      this.on("destroy.share", function(options) {
-        return _this.destroyed(options);
-      });
+      this.doc = options && options.doc;
       if (!this.collection) {
-        this.initializeSubTree();
+        this.initializeSharing();
       }
-      _.each(this.sharedAttributesKeys, function(attr) {
-        return _this.on("change:" + attr, function(model, value) {
-          return _this.updateSharedAttr(attr, _this._previousAttributes[attr], value);
-        });
-      });
     }
 
-    SharedModel.prototype.initializeSubTree = function() {
+    SharedModel.prototype.initializeSharing = function() {
       var _this = this;
       if (this.collection) {
         this.doc = this.collection.doc;
         this.subdoc = this.doc.at(this.updatePath());
       }
-      if (this.sharedCollections && this.sharedCollections.length > 0) {
-        return _.each(this.sharedCollections, function(collectionKey) {
-          var collection;
-          collection = _this[collectionKey];
-          collection.parent = _this;
-          collection.setDoc(_this.doc);
-          collection.processIndexes();
-          return _.each(collection.models, function(model) {
-            return model.initializeSubTree();
+      if (this.sharedCollections) {
+        _.each(this.sharedCollections, function(collectionKey) {
+          return _this[collectionKey].initializeSharing({
+            parent: _this,
+            doc: _this.doc
           });
         });
       }
+      if (this.sharedAttributes) {
+        _.each(this.sharedAttributesKeys, function(attr) {
+          return _this.on("change:" + attr, function(model, value) {
+            return _this.updateSharedAttr(attr, _this._previousAttributes[attr], value);
+          });
+        });
+      }
+      return this.on("destroy.share", function(options) {
+        return _this.destroyed(options);
+      });
     };
 
     SharedModel.prototype.updatePath = function() {
@@ -140,6 +137,16 @@
       });
     }
 
+    SharedCollection.prototype.initializeSharing = function(options) {
+      var _this = this;
+      this.parent = options.parent;
+      this.setDoc(options.doc);
+      this.processIndexes();
+      return _.each(this.models, function(model) {
+        return model.initializeSharing();
+      });
+    };
+
     SharedCollection.prototype.setDoc = function(doc) {
       var _this = this;
       this.doc = doc;
@@ -171,7 +178,7 @@
       var triggerSharedAdd,
         _this = this;
       triggerSharedAdd = function(model, coll, opt) {
-        model.initializeSubTree();
+        model.initializeSharing();
         if (!(options && options.fromSharedOp)) {
           return _this.trigger('add.share', model, coll, opt);
         }

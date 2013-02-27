@@ -11,6 +11,13 @@ class Backbone.SharedCollection extends Backbone.Collection
     # Listen an insertion to be shared
     @on "add.share", (model) => @modelAdded(model)
 
+  initializeSharing: (options) ->
+    @parent = options.parent
+    @setDoc(options.doc)
+    @processIndexes()
+    _.each @models, (model) =>
+      model.initializeSharing()
+
   # Get shareJS collection subdoc
   setDoc: (@doc) ->
     @subdoc = @doc.at(@updatePath())
@@ -32,7 +39,7 @@ class Backbone.SharedCollection extends Backbone.Collection
   add: (models, options) ->
     # Enable shared collection to listen to
     triggerSharedAdd = (model, coll, opt) =>
-      model.initializeSubTree()
+      model.initializeSharing()
       unless options && options.fromSharedOp
         @trigger('add.share', model, coll, opt)
 

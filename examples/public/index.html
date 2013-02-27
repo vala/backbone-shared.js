@@ -6,15 +6,8 @@
 
   <body>
 
-    <form>
-      <h1>Project</h1>
-      <div id="project">
-      </div>
-      <h2>Tracks</h2>
-      <a href="#" id="add-track-btn">Add Track</a>
-      <div id="tracks">
-      </div>
-    </form>
+    <div id="main">
+    </div>
 
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script src="/channel/bcsocket.js"></script>
@@ -60,8 +53,7 @@
           }
 
           window.project = new Project(doc.snapshot, {doc:doc});
-          window.project_view = new ProjectView({ model: window.project });
-
+          window.project_view = new ProjectView({ model: window.project, el: '#main' });
           window.project_view.render();
 
           doc.on('change', function(op) {
