@@ -14,14 +14,14 @@ class Backbone.SharedModel extends Backbone.Model
     # needed attributes
     if @sharedCollections
       _.each @sharedCollections, (collectionKey) =>
-        @[collectionKey].initializeSharing(parent: this, doc: @doc)
+        collection = @[collectionKey]
+        if collection
+          @[collectionKey].initializeSharing(parent: this, doc: @doc)
 
     if @sharedAttributes
       _.each @sharedAttributesKeys, (attr) =>
         @on "change:#{ attr }", (model, value) =>
           @updateSharedAttr(attr, @_previousAttributes[attr], value)
-
-    @on "destroy.share", @destroyed, this
 
   updatePath: ->
     if @collection
@@ -29,21 +29,20 @@ class Backbone.SharedModel extends Backbone.Model
     else
       []
 
+  attrSubdoc: (attr) ->
+    @doc.at @updatePath.concat([attr])
+
   sharedAttributes: ->
     _.pick(@attributes, @sharedAttributesKeys)
 
   destroy: (options) ->
-    if options && options.fromSharedOp
-      super(options)
-    else
-      @trigger('destroy.share')
+    unless options && options.fromSharedOp
+      @destroyed()
+
+    super(options)
 
   updateSharedAttr: (attr, old_value, value) ->
-    @doc.submitOp([
-      p: @updatePath().concat([attr]),
-      od: old_value,
-      oi: value
-    ])
+    @attrSubdoc(attr).set(value)
 
   applySharedAction: (actions) ->
     _.each actions, (action) =>
@@ -53,15 +52,22 @@ class Backbone.SharedModel extends Backbone.Model
         @destroyModel(action)
 
   setAttribute: (action) ->
+    pathMaxDepth = action.p.length - 1
     _.reduce(
       action.p
-      (current, next) =>
+      (current, next, index) =>
         if _.isNumber(next)
           current.models[next]
-        else if node = current[next]
-          node
         else
-          current.set(next, action.oi)
+          node = current[next]
+          isLastIndex = (index == pathMaxDepth)
+          isSharedCollection = _.contains(current.sharedCollections, next)
+          if isLastIndex && isSharedCollection
+            node.reset(action.oi, silent: false, fromSharedOp: true)
+          else if node
+            node
+          else
+            current.set(next, action.oi)
       this
     )
 
