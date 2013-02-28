@@ -19,7 +19,7 @@ log = (message, color, explanation) ->
 
 uglify = (input, output) ->
   min = spawn 'uglifyjs', ['-v', input, '-o', output]
-  min.stderr.on 'data', (data) -> log data.toString().trim(), bold
+  min.stderr.on 'data', (data) -> log data.toString().trim(), green
 
 task 'build', 'Build single application file from source files', ->
   source = spawn 'coffee', ['-cwj', 'backbone.shared.js'].concat(appFiles)
@@ -35,7 +35,7 @@ task 'build:examples', 'Build examples', ->
 
   invoke('build')
 
-task 'run:building', 'Run the example server while re-building everyting', ->
+task 'run:dev', 'Run the example server while re-building everyting', ->
   invoke('build:examples')
 
   app = spawn 'node', ['examples/app.js']
