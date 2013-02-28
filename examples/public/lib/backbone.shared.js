@@ -83,10 +83,6 @@
       });
     };
 
-    SharedModel.prototype.isShareCollection = function(collectionName) {
-      return _.contains(current.sharedCollections, next);
-    };
-
     SharedModel.prototype.insertModel = function(action) {
       var _this = this;
       return _.reduce(_.initial(action.p), function(current, next) {

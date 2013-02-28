@@ -53,8 +53,6 @@ class Backbone.SharedModel extends Backbone.Model
       if action.ld
         @destroyModel(action)
 
-  isShareCollection: (collectionName) ->
-    _.contains(current.sharedCollections, next)
 
   insertModel: (action) ->
     _.reduce(
@@ -65,7 +63,7 @@ class Backbone.SharedModel extends Backbone.Model
         else
           current[next]
       this).add(action.li, fromSharedOp: true)
-    
+
   setAttribute: (action) ->
     pathMaxDepth = action.p.length - 1
     _.reduce(
