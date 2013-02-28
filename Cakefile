@@ -18,7 +18,7 @@ log = (message, color, explanation) ->
   console.log color + message + reset + ' ' + (explanation or '')
 
 uglify = (input, output) ->
-  min = spawn 'uglifyjs', ['-v', '--stats', input, '-o', output]
+  min = spawn 'uglifyjs', ['-v', input, '-o', output]
   min.stderr.on 'data', (data) -> log data.toString().trim(), bold
 
 task 'build', 'Build single application file from source files', ->

@@ -145,7 +145,7 @@ class ClipView extends Backbone.View
     @$('.clip-position').val(position)
 
   updatePosition: (e) ->
-    @model.set(position: e.currentTarget.value)
+    @model.set(position: parseInt(e.currentTarget.value, 10))
 
   destroyClip: ->
     @model.destroy()

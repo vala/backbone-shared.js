@@ -56,7 +56,7 @@
           window.project_view = new ProjectView({ model: window.project, el: '#main' });
           window.project_view.render();
 
-          doc.on('change', function(op) {
+          doc.on('remoteop', function(op) {
             window.project.applySharedAction(op);
           });
         })

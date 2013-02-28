@@ -9,7 +9,7 @@ class Backbone.SharedCollection extends Backbone.Collection
     # Reprocess array index each time a model is added
     @on "add destroy", => @processIndexes()
     # Listen an insertion to be shared
-    @on "add.share", (model) => @modelAdded(model)
+    @on "reset", => @setDoc()
 
   initializeSharing: (options) ->
     @parent = options.parent
@@ -19,11 +19,18 @@ class Backbone.SharedCollection extends Backbone.Collection
       model.initializeSharing()
 
   # Get shareJS collection subdoc
-  setDoc: (@doc) ->
+  setDoc: (doc = null) ->
+    @doc = doc if doc
     @subdoc = @doc.at(@updatePath())
-    # Listen to ShareJS model insertions
-    @subdoc.on "insert", (pos, data) =>
-      @add(data, fromSharedOp: true)
+
+    try
+      @subdoc.get()
+      updatePath = @updatePath().join('-')
+      unless @listening == updatePath
+        @listening = updatePath
+        # Listen to ShareJS model insertions
+        @subdoc.on "insert", (pos, data) => @add(data, fromSharedOp: true)
+
 
   updatePath: ->
     @parent.updatePath().concat([@path])
@@ -34,14 +41,19 @@ class Backbone.SharedCollection extends Backbone.Collection
       model.trigger "indexed"
 
   modelAdded: (model) ->
-    @subdoc.push(model.sharedAttributes())
+    if @subdoc.get() == undefined
+      @subdoc.set([model.sharedAttributes()])
+      @setDoc()
+    else
+      @subdoc.push(model.sharedAttributes())
 
   add: (models, options) ->
+
     # Enable shared collection to listen to
     triggerSharedAdd = (model, coll, opt) =>
       model.initializeSharing()
       unless options && options.fromSharedOp
-        @trigger('add.share', model, coll, opt)
+        @modelAdded(model)
 
     @on "add", triggerSharedAdd
     super(models, options)

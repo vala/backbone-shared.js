@@ -254,7 +254,7 @@
 
     ClipView.prototype.updatePosition = function(e) {
       return this.model.set({
-        position: e.currentTarget.value
+        position: parseInt(e.currentTarget.value, 10)
       });
     };
 
