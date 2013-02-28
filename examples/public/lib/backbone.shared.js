@@ -9,7 +9,7 @@
 
     function SharedModel(attributes, options) {
       SharedModel.__super__.constructor.call(this, attributes, options);
-      this.doc = options && options.doc;
+      this.doc = options != null ? options.doc : void 0;
       if (!this.collection) {
         this.initializeSharing();
       }
@@ -22,50 +22,48 @@
       }
       if (this.sharedCollections) {
         _.each(this.sharedCollections, function(collectionKey) {
-          var collection;
-          collection = _this[collectionKey];
-          if (collection) {
-            return _this[collectionKey].initializeSharing({
-              parent: _this,
-              doc: _this.doc
-            });
-          }
+          var _ref;
+          return (_ref = _this[collectionKey]) != null ? _ref.initializeSharing({
+            parent: _this,
+            doc: _this.doc
+          }) : void 0;
         });
       }
       if (this.sharedAttributes) {
-        return _.each(this.sharedAttributesKeys, function(attr) {
+        _.each(this.sharedAttributesKeys, function(attr) {
           return _this.on("change:" + attr, function(model, value) {
             return _this.updateSharedAttr(attr, _this._previousAttributes[attr], value);
           });
         });
       }
+      return this.on("destroy", this.destroyed, this);
     };
 
-    SharedModel.prototype.updatePath = function() {
-      if (this.collection) {
-        return this.collection.updatePath().concat([this.index]);
-      } else {
-        return [];
-      }
+    SharedModel.prototype.sharePath = function() {
+      var _ref;
+      return ((_ref = this.collection) != null ? _ref.sharePath().concat([this.index]) : void 0) || [];
+    };
+
+    SharedModel.prototype.subDoc = function() {
+      return this.doc.at(this.sharePath());
     };
 
     SharedModel.prototype.attrSubdoc = function(attr) {
-      return this.doc.at(this.updatePath().concat([attr]));
+      return this.subDoc().concat([attr]);
     };
 
     SharedModel.prototype.sharedAttributes = function() {
       return _.pick(this.attributes, this.sharedAttributesKeys);
     };
 
-    SharedModel.prototype.destroy = function(options) {
-      if (!(options && options.fromSharedOp)) {
-        this.destroyed();
-      }
-      return SharedModel.__super__.destroy.call(this, options);
-    };
-
     SharedModel.prototype.updateSharedAttr = function(attr, old_value, value) {
       return this.attrSubdoc(attr).set(value);
+    };
+
+    SharedModel.prototype.destroyed = function(model, coll, options) {
+      if (!(options != null ? options.fromSharedOp : void 0)) {
+        return this.subDoc().remove();
+      }
     };
 
     SharedModel.prototype.applySharedAction = function(actions) {
@@ -75,7 +73,7 @@
           _this.insertModel(action);
         }
         if (action.oi) {
-          _this.setAttribute(action);
+          _this.setAttributeOrCollection(action);
         }
         if (action.ld) {
           return _this.destroyModel(action);
@@ -83,62 +81,47 @@
       });
     };
 
-    SharedModel.prototype.insertModel = function(action) {
-      var _this = this;
-      return _.reduce(_.initial(action.p), function(current, next) {
-        if (_.isNumber(next)) {
-          return current.models[next];
+    SharedModel.prototype.resourceAt = function(path) {
+      var aux,
+        _this = this;
+      aux = function(res, i) {
+        if (_.isNumber(i)) {
+          return res.models[i];
         } else {
-          return current[next];
+          return res[i];
         }
-      }, this).add(action.li, {
+      };
+      return _.reduce(path, aux, this);
+    };
+
+    SharedModel.prototype.insertModel = function(action) {
+      var coll;
+      coll = this.resourceAt(_.initial(action.p));
+      return coll.add(action.li, {
         fromSharedOp: true
       });
-    };
-
-    SharedModel.prototype.setAttribute = function(action) {
-      var pathMaxDepth,
-        _this = this;
-      pathMaxDepth = action.p.length - 1;
-      return _.reduce(action.p, function(current, next, index) {
-        var isLastIndex, isSharedCollection, node;
-        if (_.isNumber(next)) {
-          return current.models[next];
-        } else {
-          node = current[next];
-          isLastIndex = index === pathMaxDepth;
-          isSharedCollection = _.contains(current.sharedCollections, next);
-          if (isLastIndex && isSharedCollection) {
-            return node.reset(action.oi, {
-              silent: false,
-              fromSharedOp: true
-            });
-          } else if (node) {
-            return node;
-          } else {
-            return current.set(next, action.oi);
-          }
-        }
-      }, this);
-    };
-
-    SharedModel.prototype.destroyed = function(options) {
-      return this.doc.at(this.updatePath()).remove();
     };
 
     SharedModel.prototype.destroyModel = function(action) {
-      var model,
-        _this = this;
-      model = _.reduce(action.p, function(current, next) {
-        if (_.isNumber(next)) {
-          return current.models[next];
-        } else {
-          return current[next];
-        }
-      }, this);
+      var model;
+      model = this.resourceAt(action.p);
       return model.destroy({
         fromSharedOp: true
       });
+    };
+
+    SharedModel.prototype.setAttributeOrCollection = function(action) {
+      var coll, key, target;
+      target = this.resourceAt(_.initial(action.p));
+      key = _.last(action.p);
+      if ((coll = target[key]) && _.contains(target.sharedCollections, key)) {
+        return coll.reset(action.oi, {
+          silent: false,
+          fromSharedOp: true
+        });
+      } else {
+        return target.set(key, action.oi);
+      }
     };
 
     return SharedModel;
@@ -174,11 +157,11 @@
     };
 
     SharedCollection.prototype.subdoc = function() {
-      return this.doc.at(this.updatePath());
+      return this.doc.at(this.sharePath());
     };
 
     SharedCollection.prototype.setDoc = function(doc) {
-      var updatePath;
+      var sharePath;
       if (doc == null) {
         doc = null;
       }
@@ -187,15 +170,15 @@
       }
       try {
         this.subdoc().get();
-        updatePath = this.updatePath().join('-');
-        if (this.listening !== updatePath) {
-          return this.listening = updatePath;
+        sharePath = this.sharePath().join('-');
+        if (this.listening !== sharePath) {
+          return this.listening = sharePath;
         }
       } catch (_error) {}
     };
 
-    SharedCollection.prototype.updatePath = function() {
-      return this.parent.updatePath().concat([this.path]);
+    SharedCollection.prototype.sharePath = function() {
+      return this.parent.sharePath().concat([this.path]);
     };
 
     SharedCollection.prototype.processIndexes = function() {

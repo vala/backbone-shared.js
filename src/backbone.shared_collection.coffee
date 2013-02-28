@@ -19,19 +19,19 @@ class Backbone.SharedCollection extends Backbone.Collection
     _.each @models, (model) =>
       model.initializeSharing()
 
-  subdoc : -> @doc.at @updatePath()
+  subdoc : -> @doc.at @sharePath()
 
   # Get shareJS collection subdoc
   setDoc: (doc = null) ->
     @doc = doc if doc
     try
       @subdoc().get()
-      updatePath = @updatePath().join('-')
-      unless @listening == updatePath
-        @listening = updatePath
+      sharePath = @sharePath().join('-')
+      unless @listening == sharePath
+        @listening = sharePath
 
-  updatePath: ->
-    @parent.updatePath().concat([@path])
+  sharePath: ->
+    @parent.sharePath().concat([@path])
 
   processIndexes: ->
     @each (model, index) =>
