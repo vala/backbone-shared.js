@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Backbone Shared Example (no lib)</title>
+  </head>
+
+  <body>
+
+    <div id="main">
+    </div>
+
+    <script type="text/javascript" src="lib/jquery.js"></script>
+    <script src="/channel/bcsocket.js"></script>
+    <script src="/share/share.js"></script>
+    <script src="/share/json.js"></script>
+    <script type="text/javascript" src="lib/underscore.js"></script>
+    <script type="text/javascript" src="lib/backbone.js"></script>
+    <script type="text/javascript" src="js/test-no-lib.js"></script>
+    <script type="text/javascript">
+      $(function() {
+
+        var project = {
+          title: "Test Project"
+        }
+
+        sharejs.open('testdoc', 'json', 'http://localhost:8000/channel', function(error, doc) {
+          if(error) console.log(error);
+          if (doc.created) {
+            doc.submitOp([{ p: [], oi: {project: project} }]);
+          }
+          var subdoc = doc.at("project")
+          window.project = new Project(subdoc.get(), { subdoc: subdoc });
+          window.project_view = new ProjectView({ model: window.project, el: '#main' });
+          window.project_view.render();
+
+        })
+
+      });
+    </script>
+  </body>
+</html>
