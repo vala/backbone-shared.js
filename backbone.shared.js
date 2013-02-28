@@ -50,7 +50,7 @@
     };
 
     SharedModel.prototype.attrSubdoc = function(attr) {
-      return this.doc.at(this.updatePath.concat([attr]));
+      return this.doc.at(this.updatePath().concat([attr]));
     };
 
     SharedModel.prototype.sharedAttributes = function() {
@@ -71,12 +71,32 @@
     SharedModel.prototype.applySharedAction = function(actions) {
       var _this = this;
       return _.each(actions, function(action) {
+        if (action.li) {
+          _this.insertModel(action);
+        }
         if (action.oi) {
           _this.setAttribute(action);
         }
         if (action.ld) {
           return _this.destroyModel(action);
         }
+      });
+    };
+
+    SharedModel.prototype.isShareCollection = function(collectionName) {
+      return _.contains(current.sharedCollections, next);
+    };
+
+    SharedModel.prototype.insertModel = function(action) {
+      var _this = this;
+      return _.reduce(_.initial(action.p), function(current, next) {
+        if (_.isNumber(next)) {
+          return current.models[next];
+        } else {
+          return current[next];
+        }
+      }, this).add(action.li, {
+        fromSharedOp: true
       });
     };
 
@@ -148,6 +168,7 @@
 
     SharedCollection.prototype.initializeSharing = function(options) {
       var _this = this;
+      this.on("add", this.triggerSharedAdd, this);
       this.parent = options.parent;
       this.setDoc(options.doc);
       this.processIndexes();
@@ -156,26 +177,23 @@
       });
     };
 
+    SharedCollection.prototype.subdoc = function() {
+      return this.doc.at(this.updatePath());
+    };
+
     SharedCollection.prototype.setDoc = function(doc) {
-      var updatePath,
-        _this = this;
+      var updatePath;
       if (doc == null) {
         doc = null;
       }
       if (doc) {
         this.doc = doc;
       }
-      this.subdoc = this.doc.at(this.updatePath());
       try {
-        this.subdoc.get();
+        this.subdoc().get();
         updatePath = this.updatePath().join('-');
         if (this.listening !== updatePath) {
-          this.listening = updatePath;
-          return this.subdoc.on("insert", function(pos, data) {
-            return _this.add(data, {
-              fromSharedOp: true
-            });
-          });
+          return this.listening = updatePath;
         }
       } catch (_error) {}
     };
@@ -193,26 +211,19 @@
     };
 
     SharedCollection.prototype.modelAdded = function(model) {
-      if (this.subdoc.get() === void 0) {
-        this.subdoc.set([model.sharedAttributes()]);
+      if (this.subdoc().get() === void 0) {
+        this.subdoc().set([model.sharedAttributes()]);
         return this.setDoc();
       } else {
-        return this.subdoc.push(model.sharedAttributes());
+        return this.subdoc().push(model.sharedAttributes());
       }
     };
 
-    SharedCollection.prototype.add = function(models, options) {
-      var triggerSharedAdd,
-        _this = this;
-      triggerSharedAdd = function(model, coll, opt) {
-        model.initializeSharing();
-        if (!(options && options.fromSharedOp)) {
-          return _this.modelAdded(model);
-        }
-      };
-      this.on("add", triggerSharedAdd);
-      SharedCollection.__super__.add.call(this, models, options);
-      return this.off("add", triggerSharedAdd);
+    SharedCollection.prototype.triggerSharedAdd = function(model, coll, options) {
+      model.initializeSharing();
+      if (!(options && options.fromSharedOp)) {
+        return this.modelAdded(model);
+      }
     };
 
     return SharedCollection;

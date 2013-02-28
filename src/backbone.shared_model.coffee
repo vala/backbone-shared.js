@@ -30,7 +30,7 @@ class Backbone.SharedModel extends Backbone.Model
       []
 
   attrSubdoc: (attr) ->
-    @doc.at @updatePath.concat([attr])
+    @doc.at @updatePath().concat([attr])
 
   sharedAttributes: ->
     _.pick(@attributes, @sharedAttributesKeys)
@@ -46,11 +46,26 @@ class Backbone.SharedModel extends Backbone.Model
 
   applySharedAction: (actions) ->
     _.each actions, (action) =>
+      if action.li
+        @insertModel(action)
       if action.oi
         @setAttribute(action)
       if action.ld
         @destroyModel(action)
 
+  isShareCollection: (collectionName) ->
+    _.contains(current.sharedCollections, next)
+
+  insertModel: (action) ->
+    _.reduce(
+      _.initial action.p
+      (current, next) =>
+        if _.isNumber(next)
+          current.models[next]
+        else
+          current[next]
+      this).add(action.li, fromSharedOp: true)
+    
   setAttribute: (action) ->
     pathMaxDepth = action.p.length - 1
     _.reduce(
