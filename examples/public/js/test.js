@@ -240,7 +240,7 @@
     ClipView.prototype.template = _.template("    Clip :    <input type='number' name='clips[position][]' value='<%= position %>' class='clip-position'>    <a href='#' class='delete-clip-btn'>Delete</a>    <br>  ");
 
     ClipView.prototype.events = {
-      'keyup .clip-position': 'updatePosition',
+      'change .clip-position': 'updatePosition',
       'click .delete-clip-btn': 'destroyClip'
     };
 

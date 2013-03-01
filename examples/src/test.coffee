@@ -138,7 +138,7 @@ class ClipView extends Backbone.View
   ")
 
   events:
-    'keyup .clip-position': 'updatePosition'
+    'change .clip-position': 'updatePosition'
     'click .delete-clip-btn': 'destroyClip'
 
   initialize: ->
