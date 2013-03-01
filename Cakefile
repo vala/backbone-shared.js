@@ -1,6 +1,6 @@
-fs     = require 'fs'
+fs = require 'fs'
 {spawn, exec} = require 'child_process'
-
+uglifyjs = require 'uglify-js'
 appFiles  = [
   'src/backbone.shared_model.coffee'
   'src/backbone.shared_collection.coffee'
@@ -18,8 +18,8 @@ log = (message, color, explanation) ->
   console.log color + message + reset + ' ' + (explanation or '')
 
 uglify = (input, output) ->
-  min = spawn 'uglifyjs', ['-v', input, '-o', output]
-  min.stderr.on 'data', (data) -> log data.toString().trim(), green
+  min = uglifyjs.minify(input)
+  fs.writeFileSync output, min.code
 
 task 'build', 'Build single application file from source files', ->
   source = spawn 'coffee', ['-cwj', 'backbone.shared.js'].concat(appFiles)
