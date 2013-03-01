@@ -21,7 +21,7 @@
     };
 
     Project.prototype.initialize = function(project, options) {
-      return this.tracks = new TrackCollection((project != null ? project.tracks : void 0) != null);
+      return this.tracks = new TrackCollection(project != null ? project.tracks : void 0);
     };
 
     return Project;
@@ -45,7 +45,7 @@
     };
 
     Track.prototype.initialize = function(track, options) {
-      return this.clips = new ClipCollection((track != null ? track.clips : void 0) != null);
+      return this.clips = new ClipCollection(track != null ? track.clips : void 0);
     };
 
     return Track;

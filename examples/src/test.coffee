@@ -7,7 +7,7 @@ class Project extends Backbone.SharedModel
     title: "New project"
 
   initialize: (project, options) ->
-    @tracks = new TrackCollection(project?.tracks?)
+    @tracks = new TrackCollection(project?.tracks)
 
 class Track extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
@@ -17,7 +17,7 @@ class Track extends Backbone.SharedModel
     title: "New track"
 
   initialize: (track, options) ->
-    @clips = new ClipCollection(track?.clips?)
+    @clips = new ClipCollection(track?.clips)
 
 class Clip extends Backbone.SharedModel
   sharedAttributesKeys: ['position']
