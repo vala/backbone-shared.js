@@ -16,8 +16,12 @@
 
     Project.prototype.sharedCollections = ['tracks'];
 
+    Project.prototype.defaults = {
+      title: "New project"
+    };
+
     Project.prototype.initialize = function(project, options) {
-      return this.tracks = new TrackCollection(project.tracks);
+      return this.tracks = new TrackCollection((project != null ? project.tracks : void 0) != null);
     };
 
     return Project;
@@ -36,8 +40,12 @@
 
     Track.prototype.sharedCollections = ['clips'];
 
+    Track.prototype.defaults = {
+      title: "New track"
+    };
+
     Track.prototype.initialize = function(track, options) {
-      return this.clips = new ClipCollection(track.clips);
+      return this.clips = new ClipCollection((track != null ? track.clips : void 0) != null);
     };
 
     return Track;
@@ -53,6 +61,10 @@
     }
 
     Clip.prototype.sharedAttributesKeys = ['position'];
+
+    Clip.prototype.defaults = {
+      position: 0
+    };
 
     return Clip;
 
@@ -135,11 +147,7 @@
     };
 
     ProjectView.prototype.addTrack = function() {
-      return this.model.tracks.add([
-        {
-          title: "New track"
-        }
-      ]);
+      return this.model.tracks.add();
     };
 
     ProjectView.prototype.trackAdded = function(track) {
@@ -200,9 +208,7 @@
     };
 
     TrackView.prototype.addClip = function(e) {
-      return this.model.clips.add({
-        position: 0
-      });
+      return this.model.clips.add();
     };
 
     TrackView.prototype.clipAdded = function(clip) {

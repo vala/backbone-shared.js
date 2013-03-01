@@ -20,36 +20,27 @@
     <script type="text/javascript">
       $(function() {
 
-        var project = {
-          title: "Test Project",
-          tracks: [
-            { title: "Track 1",
-              clips: [
-                { position: 0 }
-              ]
-            },
-            { title: "Track 2",
-              clips: [
-                { position: 0 }
-              ]
-            },
-            { title: "Track 3",
-              clips: [
-                { position: 0 }
-              ]
-            },
-            { title: "Track 4",
-              clips: [
-                { position: 0 }
-              ]
-            }
-          ]
-        }
+        /* The shared doc looks like
+           var project = {
+             title: "The title",
+             tracks: [
+               { title: "Track title",
+                 clips: [
+                   { position: 0 }
+                 ]
+               },
+               { title: "Another track title",
+                 clips: [
+                   { position: 2 }
+                 ]
+               }
+             ]
+           } */
 
         sharejs.open('testdoc', 'json', 'http://localhost:8000/channel', function(error, doc) {
           if(error) console.log(error);
           if (doc.created) {
-            doc.submitOp([{ p: [], oi: project }]);
+            doc.submitOp([{ p: [], oi: {} }]);
           }
 
           window.project = new Project(doc.snapshot, {doc:doc});

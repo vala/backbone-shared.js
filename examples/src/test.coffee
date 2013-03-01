@@ -3,19 +3,27 @@ class Project extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
   sharedCollections: ['tracks']
 
-  initialize: (project, options) ->
-    @tracks = new TrackCollection(project.tracks)
+  defaults:
+    title: "New project"
 
+  initialize: (project, options) ->
+    @tracks = new TrackCollection(project?.tracks?)
 
 class Track extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
   sharedCollections: ['clips']
 
+  defaults:
+    title: "New track"
+
   initialize: (track, options) ->
-    @clips = new ClipCollection(track.clips)
+    @clips = new ClipCollection(track?.clips?)
 
 class Clip extends Backbone.SharedModel
   sharedAttributesKeys: ['position']
+
+  defaults:
+    position: 0
 
 # Collections
 class TrackCollection extends Backbone.SharedCollection
@@ -62,7 +70,7 @@ class ProjectView extends Backbone.View
     @model.set(title: e.currentTarget.value)
 
   addTrack: ->
-    @model.tracks.add([title: "New track"])
+    @model.tracks.add()
 
   trackAdded: (track) ->
     view = new TrackView(model: track)
@@ -109,7 +117,7 @@ class TrackView extends Backbone.View
     @model.destroy()
 
   addClip: (e) ->
-    @model.clips.add({ position: 0 })
+    @model.clips.add()
 
   clipAdded: (clip) ->
     view = new ClipView(model: clip)
