@@ -52,7 +52,7 @@ class Backbone.SharedModel extends Backbone.Model
   # Fetches the given attribute's subdoc
   #
   attrSubdoc: (attr) ->
-    @subDoc().concat([attr])
+    @subDoc().at [attr]
 
   # Returns the hash of attributes, selecting only the ones that are shared
   #

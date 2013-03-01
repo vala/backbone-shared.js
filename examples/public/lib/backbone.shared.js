@@ -49,7 +49,7 @@
     };
 
     SharedModel.prototype.attrSubdoc = function(attr) {
-      return this.subDoc().concat([attr]);
+      return this.subDoc().at([attr]);
     };
 
     SharedModel.prototype.sharedAttributes = function() {
