@@ -6,7 +6,6 @@ class Project extends Backbone.SharedModel
   initialize: (project, options) ->
     @tracks = new TrackCollection(project.tracks)
 
-
 class Track extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
   sharedCollections: ['clips']
@@ -33,6 +32,7 @@ class ProjectView extends Backbone.View
   events:
     'keyup .project-title': 'updateTitle'
     'click .add-track-btn': 'addTrack'
+    'click .add-track-with-clips-btn': 'addTrackWithClips'
 
   created: false
 
@@ -40,6 +40,7 @@ class ProjectView extends Backbone.View
     <h1>Project</h1>
     <input type='text' name='title' value='<%= title %>' class='project-title'>
     <button class='add-track-btn' type='button'>Add Track</button>
+    <button class='add-track-with-clips-btn' type='button'>Add Track with Clips</button>
     <div class='tracks'></div>
   ")
 
@@ -68,6 +69,17 @@ class ProjectView extends Backbone.View
     view = new TrackView(model: track)
     @$('.tracks').append(view.render().el)
 
+  addTrackWithClips: ->
+    # @model.tracks.add(
+    #   title: 'New Tracks with clips'
+    #   clips: [
+    #     { position: 0 }
+    #     { position: 1 }
+    #   ]
+    # )
+    t = new Track(title: "Wesh" , collection: @model.tracks)
+    t.clips.add([position: 5])
+    @model.tracks.add(t)
 
 
 class TrackView extends Backbone.View

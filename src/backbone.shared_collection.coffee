@@ -16,16 +16,18 @@ class Backbone.SharedCollection extends Backbone.Collection
     @parent = options.parent
     @setDoc(options.doc)
     @processIndexes()
+    isNewCollection = !@subDoc().get()
     _.each @models, (model) =>
       model.initializeSharing()
+      @modelAdded(model) if isNewCollection
 
-  subdoc : -> @doc.at @sharePath()
+  subDoc : -> @doc.at @sharePath()
 
-  # Get shareJS collection subdoc
+  # Get shareJS collection subDoc
   setDoc: (doc = null) ->
     @doc = doc if doc
     try
-      @subdoc().get()
+      @subDoc().get()
       sharePath = @sharePath().join('-')
       unless @listening == sharePath
         @listening = sharePath
@@ -39,16 +41,17 @@ class Backbone.SharedCollection extends Backbone.Collection
       model.trigger "indexed"
 
   modelAdded: (model) ->
-    if @subdoc().get() == undefined
-      @subdoc().set([model.sharedAttributes()])
+    if @subDoc().get() == undefined
+      @subDoc().set([model.sharedAttributes()])
       @setDoc()
     else
-      @subdoc().push(model.sharedAttributes())
+      @subDoc().push(model.sharedAttributes())
 
   # Enable shared collection to listen to
   triggerSharedAdd : (model, coll, options) ->
-    model.initializeSharing()
     unless options && options.fromSharedOp
       @modelAdded(model)
+
+    model.initializeSharing()
 
 

@@ -102,12 +102,13 @@
 
     ProjectView.prototype.events = {
       'keyup .project-title': 'updateTitle',
-      'click .add-track-btn': 'addTrack'
+      'click .add-track-btn': 'addTrack',
+      'click .add-track-with-clips-btn': 'addTrackWithClips'
     };
 
     ProjectView.prototype.created = false;
 
-    ProjectView.prototype.template = _.template("    <h1>Project</h1>    <input type='text' name='title' value='<%= title %>' class='project-title'>    <button class='add-track-btn' type='button'>Add Track</button>    <div class='tracks'></div>  ");
+    ProjectView.prototype.template = _.template("    <h1>Project</h1>    <input type='text' name='title' value='<%= title %>' class='project-title'>    <button class='add-track-btn' type='button'>Add Track</button>    <button class='add-track-with-clips-btn' type='button'>Add Track with Clips</button>    <div class='tracks'></div>  ");
 
     ProjectView.prototype.initialize = function() {
       var _this = this;
@@ -148,6 +149,20 @@
         model: track
       });
       return this.$('.tracks').append(view.render().el);
+    };
+
+    ProjectView.prototype.addTrackWithClips = function() {
+      var t;
+      t = new Track({
+        title: "Wesh",
+        collection: this.model.tracks
+      });
+      t.clips.add([
+        {
+          position: 5
+        }
+      ]);
+      return this.model.tracks.add(t);
     };
 
     return ProjectView;
