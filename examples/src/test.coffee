@@ -22,9 +22,20 @@ class Track extends Backbone.SharedModel
 
 class Clip extends Backbone.SharedModel
   sharedAttributesKeys: ['position']
+  sharedCollections: ['comments']
 
   defaults:
     position: 0
+
+  initialize: (clip, options) ->
+    @comments = new CommentCollection(clip?.comments)
+
+class Comment extends Backbone.SharedModel
+  sharedAttributesKeys: ['content']
+
+  defaults:
+    content: "Comment content test !"
+
 
 # Collections
 class TrackCollection extends Backbone.SharedCollection
@@ -34,6 +45,11 @@ class TrackCollection extends Backbone.SharedCollection
 class ClipCollection extends Backbone.SharedCollection
   path: 'clips'
   model: Clip
+
+class CommentCollection extends Backbone.SharedCollection
+  path: 'comments'
+  model: Comment
+
 
 # Views
 class ProjectView extends Backbone.View

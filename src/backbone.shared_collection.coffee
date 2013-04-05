@@ -18,8 +18,8 @@ class Backbone.SharedCollection extends Backbone.Collection
     @processIndexes()
     isNewCollection = !@subDoc().get()
     _.each @models, (model) =>
-      model.initializeSharing()
       @modelAdded(model) if isNewCollection
+      model.initializeSharing()
 
   subDoc : -> @doc.at @sharePath()
 
@@ -52,9 +52,7 @@ class Backbone.SharedCollection extends Backbone.Collection
     # Ensure we have a collection
     return unless model.root or model.collection
 
-    unless options && options.fromSharedOp
-      @modelAdded(model)
-
+    @modelAdded(model) unless options && options.fromSharedOp
     model.initializeSharing()
 
 

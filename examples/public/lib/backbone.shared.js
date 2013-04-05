@@ -159,10 +159,10 @@
       this.processIndexes();
       isNewCollection = !this.subDoc().get();
       return _.each(this.models, function(model) {
-        model.initializeSharing();
         if (isNewCollection) {
-          return _this.modelAdded(model);
+          _this.modelAdded(model);
         }
+        return model.initializeSharing();
       });
     };
 
