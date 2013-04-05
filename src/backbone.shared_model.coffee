@@ -1,13 +1,21 @@
 class Backbone.SharedModel extends Backbone.Model
+  # By default, a shared model should belong to a collection, so we can
+  # easily retrieve its path in the document
+  # You can override this behavior with 2 methods :
+  # * Declaring `root : true` in the subclass' body
+  # * Passing `{ root: true }` in the model constructor options
+  #
+  root: false
 
   # Allows initializing sharing on root node
   #
   constructor: (attributes, options) ->
     super(attributes, options)
     @doc = options?.doc
+    @root = options.root if options?.root
     # If we're on root node, we manually setup shared attributes on children
     # collections now that our objects are fully created
-    @initializeSharing() unless @collection
+    @initializeSharing() if @root
 
   # Initializes sharing and related data setup
   #
@@ -18,7 +26,7 @@ class Backbone.SharedModel extends Backbone.Model
   #
   initializeSharing: ->
     # Set doc from parent collection if not root node
-    @doc = @collection.doc if @collection
+    @doc = @collection.doc unless @root
 
     # If we have shared sub-collections, initialize them and setup
     # needed attributes
@@ -52,7 +60,7 @@ class Backbone.SharedModel extends Backbone.Model
   # Fetches the given attribute's subdoc
   #
   attrSubdoc: (attr) ->
-    @subDoc().concat([attr])
+    @subDoc().at [attr]
 
   # Returns the hash of attributes, selecting only the ones that are shared
   #

@@ -12,12 +12,18 @@
       return Project.__super__.constructor.apply(this, arguments);
     }
 
+    Project.prototype.root = true;
+
     Project.prototype.sharedAttributesKeys = ['title'];
 
     Project.prototype.sharedCollections = ['tracks'];
 
+    Project.prototype.defaults = {
+      title: "New project"
+    };
+
     Project.prototype.initialize = function(project, options) {
-      return this.tracks = new TrackCollection(project.tracks);
+      return this.tracks = new TrackCollection(project != null ? project.tracks : void 0);
     };
 
     return Project;
@@ -36,8 +42,12 @@
 
     Track.prototype.sharedCollections = ['clips'];
 
+    Track.prototype.defaults = {
+      title: "New track"
+    };
+
     Track.prototype.initialize = function(track, options) {
-      return this.clips = new ClipCollection(track.clips);
+      return this.clips = new ClipCollection(track != null ? track.clips : void 0);
     };
 
     return Track;
@@ -53,6 +63,10 @@
     }
 
     Clip.prototype.sharedAttributesKeys = ['position'];
+
+    Clip.prototype.defaults = {
+      position: 0
+    };
 
     return Clip;
 
@@ -103,12 +117,12 @@
     ProjectView.prototype.events = {
       'keyup .project-title': 'updateTitle',
       'click .add-track-btn': 'addTrack',
-      'click .add-track-with-clips-btn': 'addTrackWithClips'
+      'click .add-tracks-with-clips-btn': 'addTracksWithClips'
     };
 
     ProjectView.prototype.created = false;
 
-    ProjectView.prototype.template = _.template("    <h1>Project</h1>    <input type='text' name='title' value='<%= title %>' class='project-title'>    <button class='add-track-btn' type='button'>Add Track</button>    <button class='add-track-with-clips-btn' type='button'>Add Track with Clips</button>    <div class='tracks'></div>  ");
+    ProjectView.prototype.template = _.template("    <h1>Project</h1>    <input type='text' name='title' value='<%= title %>' class='project-title'>    <button class='add-track-btn' type='button'>Add Track</button>    <button class='add-tracks-with-clips-btn' type='button'>Add Tracks with Clips</button>    <div class='tracks'></div>  ");
 
     ProjectView.prototype.initialize = function() {
       var _this = this;
@@ -136,11 +150,7 @@
     };
 
     ProjectView.prototype.addTrack = function() {
-      return this.model.tracks.add([
-        {
-          title: "New track"
-        }
-      ]);
+      return this.model.tracks.add();
     };
 
     ProjectView.prototype.trackAdded = function(track) {
@@ -151,8 +161,18 @@
       return this.$('.tracks').append(view.render().el);
     };
 
-    ProjectView.prototype.addTrackWithClips = function() {
+    ProjectView.prototype.addTracksWithClips = function() {
       var t;
+      this.model.tracks.add({
+        title: 'New Tracks with clips',
+        clips: [
+          {
+            position: 0
+          }, {
+            position: 1
+          }
+        ]
+      });
       t = new Track({
         title: "Wesh",
         collection: this.model.tracks
@@ -215,9 +235,7 @@
     };
 
     TrackView.prototype.addClip = function(e) {
-      return this.model.clips.add({
-        position: 0
-      });
+      return this.model.clips.add();
     };
 
     TrackView.prototype.clipAdded = function(clip) {
@@ -249,7 +267,7 @@
     ClipView.prototype.template = _.template("    Clip :    <input type='number' name='clips[position][]' value='<%= position %>' class='clip-position'>    <a href='#' class='delete-clip-btn'>Delete</a>    <br>  ");
 
     ClipView.prototype.events = {
-      'keyup .clip-position': 'updatePosition',
+      'change .clip-position': 'updatePosition',
       'click .delete-clip-btn': 'destroyClip'
     };
 

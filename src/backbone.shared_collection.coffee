@@ -49,6 +49,9 @@ class Backbone.SharedCollection extends Backbone.Collection
 
   # Enable shared collection to listen to
   triggerSharedAdd : (model, coll, options) ->
+    # Ensure we have a collection
+    return unless model.root or model.collection
+
     unless options && options.fromSharedOp
       @modelAdded(model)
 

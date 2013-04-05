@@ -7,17 +7,22 @@
 
     __extends(SharedModel, _super);
 
+    SharedModel.prototype.root = false;
+
     function SharedModel(attributes, options) {
       SharedModel.__super__.constructor.call(this, attributes, options);
       this.doc = options != null ? options.doc : void 0;
-      if (!this.collection) {
+      if (options != null ? options.root : void 0) {
+        this.root = options.root;
+      }
+      if (this.root) {
         this.initializeSharing();
       }
     }
 
     SharedModel.prototype.initializeSharing = function() {
       var _this = this;
-      if (this.collection) {
+      if (!this.root) {
         this.doc = this.collection.doc;
       }
       if (this.sharedCollections) {
@@ -49,7 +54,7 @@
     };
 
     SharedModel.prototype.attrSubdoc = function(attr) {
-      return this.subDoc().concat([attr]);
+      return this.subDoc().at([attr]);
     };
 
     SharedModel.prototype.sharedAttributes = function() {
@@ -204,6 +209,9 @@
     };
 
     SharedCollection.prototype.triggerSharedAdd = function(model, coll, options) {
+      if (!(model.root || model.collection)) {
+        return;
+      }
       if (!(options && options.fromSharedOp)) {
         this.modelAdded(model);
       }

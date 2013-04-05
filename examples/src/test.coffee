@@ -1,20 +1,30 @@
 # Models
 class Project extends Backbone.SharedModel
+  root: true
   sharedAttributesKeys: ['title']
   sharedCollections: ['tracks']
 
+  defaults:
+    title: "New project"
+
   initialize: (project, options) ->
-    @tracks = new TrackCollection(project.tracks)
+    @tracks = new TrackCollection(project?.tracks)
 
 class Track extends Backbone.SharedModel
   sharedAttributesKeys: ['title']
   sharedCollections: ['clips']
 
+  defaults:
+    title: "New track"
+
   initialize: (track, options) ->
-    @clips = new ClipCollection(track.clips)
+    @clips = new ClipCollection(track?.clips)
 
 class Clip extends Backbone.SharedModel
   sharedAttributesKeys: ['position']
+
+  defaults:
+    position: 0
 
 # Collections
 class TrackCollection extends Backbone.SharedCollection
@@ -32,7 +42,7 @@ class ProjectView extends Backbone.View
   events:
     'keyup .project-title': 'updateTitle'
     'click .add-track-btn': 'addTrack'
-    'click .add-track-with-clips-btn': 'addTrackWithClips'
+    'click .add-tracks-with-clips-btn': 'addTracksWithClips'
 
   created: false
 
@@ -40,7 +50,7 @@ class ProjectView extends Backbone.View
     <h1>Project</h1>
     <input type='text' name='title' value='<%= title %>' class='project-title'>
     <button class='add-track-btn' type='button'>Add Track</button>
-    <button class='add-track-with-clips-btn' type='button'>Add Track with Clips</button>
+    <button class='add-tracks-with-clips-btn' type='button'>Add Tracks with Clips</button>
     <div class='tracks'></div>
   ")
 
@@ -63,20 +73,23 @@ class ProjectView extends Backbone.View
     @model.set(title: e.currentTarget.value)
 
   addTrack: ->
-    @model.tracks.add([title: "New track"])
+    @model.tracks.add()
 
   trackAdded: (track) ->
     view = new TrackView(model: track)
     @$('.tracks').append(view.render().el)
 
-  addTrackWithClips: ->
-    # @model.tracks.add(
-    #   title: 'New Tracks with clips'
-    #   clips: [
-    #     { position: 0 }
-    #     { position: 1 }
-    #   ]
-    # )
+  # Trying two nested resources add methods
+  #
+  addTracksWithClips: ->
+    @model.tracks.add(
+      title: 'New Tracks with clips'
+      clips: [
+        { position: 0 }
+        { position: 1 }
+      ]
+    )
+
     t = new Track(title: "Wesh" , collection: @model.tracks)
     t.clips.add([position: 5])
     @model.tracks.add(t)
@@ -121,7 +134,7 @@ class TrackView extends Backbone.View
     @model.destroy()
 
   addClip: (e) ->
-    @model.clips.add({ position: 0 })
+    @model.clips.add()
 
   clipAdded: (clip) ->
     view = new ClipView(model: clip)
@@ -142,7 +155,7 @@ class ClipView extends Backbone.View
   ")
 
   events:
-    'keyup .clip-position': 'updatePosition'
+    'change .clip-position': 'updatePosition'
     'click .delete-clip-btn': 'destroyClip'
 
   initialize: ->
