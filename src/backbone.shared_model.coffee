@@ -130,5 +130,5 @@ class Backbone.SharedModel extends Backbone.Model
       coll.reset(action.oi, silent: false, fromSharedOp: true)
     # Else, key is an attribute of target, so we update its value
     else
-      target.set(key, action.oi)
+      target.set(key, action.oi, fromSharedOp: true)
 
