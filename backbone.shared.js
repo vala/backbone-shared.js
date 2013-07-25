@@ -77,13 +77,13 @@
       var _this = this;
 
       return _.each(actions, function(action) {
-        if (action.li) {
+        if (action.li != null) {
           _this.insertModel(action);
         }
-        if (action.oi) {
+        if (action.oi != null) {
           _this.setAttributeOrCollection(action);
         }
-        if (action.ld) {
+        if (action.ld != null) {
           return _this.destroyModel(action);
         }
       });

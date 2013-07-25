@@ -89,11 +89,11 @@ class Backbone.SharedModel extends Backbone.Model
   #
   applySharedAction: (actions) ->
     _.each actions, (action) =>
-      if action.li
+      if action.li?
         @insertModel(action)
-      if action.oi
+      if action.oi?
         @setAttributeOrCollection(action)
-      if action.ld
+      if action.ld?
         @destroyModel(action)
 
   # Fetches the resource in the current Backbone tree, being a model or a
